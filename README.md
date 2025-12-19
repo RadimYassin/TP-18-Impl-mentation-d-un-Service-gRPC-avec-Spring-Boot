@@ -1,4 +1,5 @@
 # Service Bancaire gRPC avec Spring Boot
+<img width="961" height="876" alt="Screenshot 2025-12-19 231209" src="https://github.com/user-attachments/assets/063fb619-f509-438c-b6e9-e168b5e1beb8" />
 
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)

@@ -1,38 +1,50 @@
 # Service Bancaire gRPC avec Spring Boot
 
-## Vue d'ensemble du projet
+[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![gRPC](https://img.shields.io/badge/gRPC-1.53.0-blue.svg)](https://grpc.io/)
+[![Maven](https://img.shields.io/badge/Maven-3.8+-red.svg)](https://maven.apache.org/)
 
-Ce projet représente une implémentation moderne d'un système de gestion de comptes bancaires, construit sur une architecture orientée services utilisant gRPC comme protocole de communication. L'objectif principal était de démontrer comment les technologies de communication haute performance peuvent être intégrées dans l'écosystème Spring Boot pour créer des services financiers robustes et évolutifs.
+Un service bancaire moderne implémentant gRPC avec Spring Boot pour la gestion de comptes bancaires haute performance.
 
-## Contexte et motivation technique
+## 📋 Table des matières
 
-Dans le développement de ce service, j'ai fait le choix délibéré d'utiliser gRPC plutôt que REST traditionnel pour plusieurs raisons stratégiques :
+- [Vue d'ensemble](#-vue-densemble)
+- [Fonctionnalités](#-fonctionnalités)
+- [Architecture](#-architecture)
+- [Technologies](#-technologies)
+- [Prérequis](#-prérequis)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Utilisation](#-utilisation)
+- [API gRPC](#-api-grpc)
+- [Base de données](#-base-de-données)
+- [Tests](#-tests)
+- [Déploiement](#-déploiement)
+
+## 🎯 Vue d'ensemble
+
+Ce projet démontre l'implémentation d'un service bancaire utilisant **gRPC** comme protocole de communication au lieu de REST traditionnel. L'architecture orientée services permet des communications haute performance grâce à la sérialisation binaire de Protocol Buffers.
 
 ### Pourquoi gRPC ?
 
-**Performance et efficacité** : gRPC utilise HTTP/2 et Protocol Buffers, offrant une sérialisation binaire bien plus compacte que JSON. Pour un système bancaire où les transactions doivent être rapides et fiables, cette optimisation est cruciale. Les tests montrent que gRPC peut être jusqu'à 7 fois plus rapide que REST dans certains scénarios.
+- **Performance** : Jusqu'à 7x plus rapide que REST grâce à HTTP/2 et Protocol Buffers
+- **Typage fort** : Contrat d'API strict défini dans `.proto` éliminant les ambiguïtés
+- **Génération de code** : Stubs client/serveur générés automatiquement
+- **Streaming** : Support natif du streaming bidirectionnel pour les fonctionnalités temps réel
 
-**Contrat strict et typage fort** : Avec Protocol Buffers, le contrat d'API est défini de manière explicite dans un fichier `.proto`. Cela élimine les ambiguïtés et permet une génération automatique de code client/serveur, réduisant drastiquement les erreurs d'intégration.
+## ✨ Fonctionnalités
 
-**Communication bidirectionnelle** : Bien que non exploité dans cette version initiale, gRPC supporte nativement le streaming bidirectionnel, ouvrant la voie à des fonctionnalités temps réel comme les notifications de transactions.
+- ✅ **Gestion des comptes** : Création et consultation de comptes bancaires
+- ✅ **Types de comptes** : Support des comptes COURANT et EPARGNE
+- ✅ **Statistiques** : Calcul en temps réel du nombre de comptes, somme et moyenne des soldes
+- ✅ **Base de données** : Persistance avec JPA/Hibernate et H2
+- ✅ **Console H2** : Interface web pour gérer la base de données
+- ✅ **Hot reload** : Spring Boot DevTools pour le développement
 
-## Architecture technique
-
-### Stack technologique
-
-**Spring Boot 3.2.0** : J'ai opté pour la dernière version stable de Spring Boot pour bénéficier des améliorations de performance et de la compatibilité Jakarta EE. Cette version offre également une meilleure intégration avec Java 20.
-
-**Java 17** : L'utilisation de Java 17 LTS (Long Term Support) assure la stabilité et la compatibilité à long terme. Cette version offre d'excellentes performances et est largement supportée par l'écosystème Spring Boot.
-
-**gRPC 1.53.0** : Version stable et éprouvée, offrant un équilibre entre fonctionnalités et stabilité. L'intégration avec `grpc-server-spring-boot-starter` (3.1.0.RELEASE) simplifie considérablement la configuration.
-
-**H2 Database** : Pour le développement et les tests, H2 offre une base de données embarquée performante. En production, une migration vers PostgreSQL ou MySQL serait triviale grâce à l'abstraction JPA.
-
-**Lombok** : Réduit le code boilerplate de 40-50%, améliorant la lisibilité et la maintenabilité du code.
+## 🏗️ Architecture
 
 ### Structure en couches
-
-L'application suit une architecture en couches classique mais efficace :
 
 ```
 ┌─────────────────────────────┐
@@ -46,127 +58,137 @@ L'application suit une architecture en couches classique mais efficace :
 └─────────────────────────────┘
 ```
 
-**Séparation des responsabilités** : Chaque couche a un rôle bien défini. La couche gRPC ne contient que la logique de transformation entre les messages Protobuf et les objets métier. Les calculs statistiques (somme, moyenne des soldes) sont délégués à la couche service.
+### Structure du projet
 
-**Découplage** : L'utilisation d'interfaces (Repository) et d'injection de dépendances permet de changer facilement l'implémentation sans toucher au code métier.
+```
+src/
+├── main/
+│   ├── java/ma/projet/grpc/
+│   │   ├── GrpcApplication.java          # Point d'entrée
+│   │   ├── controllers/
+│   │   │   └── CompteServiceImpl.java    # Implémentation gRPC
+│   │   ├── services/
+│   │   │   └── CompteService.java        # Logique métier
+│   │   ├── repositories/
+│   │   │   └── CompteRepository.java     # Accès données
+│   │   └── entities/
+│   │       └── Compte.java               # Entité JPA
+│   ├── proto/
+│   │   └── CompteService.proto           # Définition gRPC
+│   └── resources/
+│       └── application.properties        # Configuration
+└── test/
+    └── java/                             # Tests unitaires
+```
 
-## Choix de conception
+## 🛠️ Technologies
 
-### Gestion des identifiants
+| Technologie | Version | Rôle |
+|------------|---------|------|
+| **Java** | 17 LTS | Langage de programmation |
+| **Spring Boot** | 3.2.0 | Framework applicatif |
+| **gRPC** | 1.53.0 | Protocole de communication |
+| **Protocol Buffers** | 3.21.7 | Sérialisation des données |
+| **H2 Database** | Runtime | Base de données embarquée |
+| **Hibernate/JPA** | 6.3.1 | ORM pour la persistance |
+| **Lombok** | 1.18.30 | Réduction du code boilerplate |
+| **Maven** | 3.8+ | Gestion des dépendances |
 
-J'ai choisi d'utiliser des UUID générés automatiquement par JPA (`GenerationType.UUID`) plutôt que des identifiants séquentiels. Cette approche présente plusieurs avantages :
-- **Sécurité** : Les UUID ne révèlent pas le nombre de comptes dans le système
-- **Distribution** : Facilite la répartition sur plusieurs bases de données sans collision
-- **Prédictibilité** : Impossible de deviner les identifiants d'autres comptes
+## 📦 Prérequis
 
-### Énumération des types de compte
+- **Java 17** ou supérieur ([Télécharger](https://www.oracle.com/java/technologies/downloads/))
+- **Maven 3.8+** ([Télécharger](https://maven.apache.org/download.cgi))
+- **Un client gRPC** (optionnel pour les tests) :
+  - [BloomRPC](https://github.com/bloomrpc/bloomrpc) (recommandé)
+  - [Postman](https://www.postman.com/) (supporte gRPC)
+  - [grpcurl](https://github.com/fullstorydev/grpcurl) (ligne de commande)
 
-Le type de compte (COURANT/EPARGNE) est défini dans le fichier Protobuf et stocké comme String en base. Cette approche permet :
-- Une évolution facile (ajout de nouveaux types)
-- Une compatibilité totale entre le contrat gRPC et le modèle de données
-- Une lisibilité accrue dans la base de données
+## 🚀 Installation
 
-### Gestion des erreurs
+### 1. Cloner le projet
 
-Les erreurs sont propagées via le mécanisme standard de gRPC (`responseObserver.onError()`). Pour la production, j'envisagerais d'ajouter :
-- Des codes d'erreur personnalisés
-- Un intercepteur global pour logger toutes les erreurs
-- Une transformation des exceptions JPA en erreurs gRPC appropriées
+```bash
+git clone https://github.com/RadimYassin/TP-18-Impl-mentation-d-un-Service-gRPC-avec-Spring-Boot.git
+cd TP-18-Impl-mentation-d-un-Service-gRPC-avec-Spring-Boot
+```
 
-## Dépendances clés et leur rôle
-
-### Protobuf et gRPC
-
-**`protobuf-java` (3.22.0)** : Bibliothèque de base pour la sérialisation/désérialisation des messages. C'est le cœur de la communication gRPC.
-
-**`grpc-netty-shaded` (1.53.0)** : Implémente le transport réseau basé sur Netty. La version "shaded" évite les conflits de dépendances en embarquant Netty dans un package isolé.
-
-**`grpc-protobuf` (1.53.0)** : Pont entre gRPC et Protobuf, permettant l'utilisation des messages Protobuf comme types de requête/réponse.
-
-**`grpc-stub` (1.53.0)** : Génère les stubs client et serveur. Ces classes abstraites sont la base de notre implémentation.
-
-**`grpc-server-spring-boot-starter` (3.1.0)** : Intégration Spring Boot qui configure automatiquement le serveur gRPC, gère le cycle de vie, et permet l'utilisation de l'annotation `@GrpcService`.
-
-### Plugin Maven Protobuf
-
-Le plugin `protobuf-maven-plugin` est crucial : il génère automatiquement les classes Java à partir du fichier `.proto` lors de la compilation. Sans lui, nous devrions écrire manuellement des centaines de lignes de code de sérialisation.
-
-## Fonctionnalités implémentées
-
-### 1. Récupération de tous les comptes (`AllComptes`)
-
-Retourne la liste complète des comptes avec transformation JPA → Protobuf. Utilise les streams Java pour une conversion élégante et performante.
-
-### 2. Recherche par identifiant (`CompteById`)
-
-Recherche ciblée avec gestion d'erreur explicite si le compte n'existe pas. Le message d'erreur est descriptif pour faciliter le debugging côté client.
-
-### 3. Statistiques globales (`TotalSolde`)
-
-Calcule en temps réel :
-- Le nombre total de comptes
-- La somme des soldes
-- La moyenne des soldes
-
-Cette méthode démontre comment agréger des données côté serveur plutôt que de transférer toutes les données au client.
-
-### 4. Création de compte (`SaveCompte`)
-
-Persiste un nouveau compte avec génération automatique d'UUID. La méthode retourne le compte créé avec son identifiant, permettant au client de le référencer immédiatement.
-
-## Configuration et démarrage
-
-### Prérequis
-
-- Java 17 ou supérieur
-- Maven 3.8+
-- Un client gRPC (BloomRPC, Postman, ou grpcurl)
-
-### Compilation
+### 2. Compiler le projet
 
 ```bash
 mvn clean install
 ```
 
 Cette commande :
-1. Compile le fichier `.proto` et génère les classes Java dans `target/generated-sources`
-2. Compile le code Java
-3. Exécute les tests (si présents)
-4. Package l'application en JAR exécutable
+- Nettoie le répertoire `target/`
+- Compile le fichier `.proto` et génère les classes Java
+- Compile le code source
+- Exécute les tests
+- Package l'application en JAR
 
-### Exécution
+### 3. Lancer l'application
 
 ```bash
 mvn spring-boot:run
 ```
 
+Ou avec le JAR généré :
+
+```bash
+java -jar target/grpc-service-1.0.0.jar
+```
+
+## ⚙️ Configuration
+
+### Ports
+
 L'application démarre sur deux ports :
-- **Port 9090** : Serveur gRPC
-- **Port 8081** : Serveur HTTP (pour la console H2)
+
+| Service | Port | Description |
+|---------|------|-------------|
+| **gRPC Server** | `9090` | Service gRPC pour les clients |
+| **HTTP Server** | `8081` | Console H2 et endpoints Spring Boot |
+
+### Fichier `application.properties`
+
+```properties
+# Serveur gRPC
+grpc.server.port=9090
+
+# Base de données H2
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.username=sa
+spring.datasource.password=
+
+# Console H2
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# Serveur HTTP
+server.port=8081
+
+# JPA/Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
+
+## 💻 Utilisation
 
 ### Accès à la console H2
 
-URL : `http://localhost:8081/h2-console`
+1. Ouvrir le navigateur : **http://localhost:8081/h2-console**
+2. Paramètres de connexion :
+   - **JDBC URL** : `jdbc:h2:mem:testdb`
+   - **Username** : `sa`
+   - **Password** : *(laisser vide)*
 
-Paramètres de connexion :
-- JDBC URL : `jdbc:h2:mem:testdb`
-- Username : `sa`
-- Password : (vide)
+### Tester avec BloomRPC
 
-## Tests avec BloomRPC
+1. **Importer le proto** : `src/main/proto/CompteService.proto`
+2. **Configurer l'adresse** : `localhost:9090`
+3. **Tester les services** :
 
-### Installation
+#### Créer un compte
 
-Télécharger BloomRPC depuis : https://github.com/bloomrpc/bloomrpc/releases
-
-### Configuration
-
-1. Importer le fichier `src/main/proto/CompteService.proto`
-2. Configurer l'adresse du serveur : `localhost:9090`
-
-### Exemples de requêtes
-
-**Créer un compte :**
 ```json
 {
   "compte": {
@@ -177,75 +199,123 @@ Télécharger BloomRPC depuis : https://github.com/bloomrpc/bloomrpc/releases
 }
 ```
 
-**Récupérer tous les comptes :**
+#### Récupérer tous les comptes
+
 ```json
 {}
 ```
 
-**Rechercher un compte par ID :**
+#### Rechercher par ID
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
-**Obtenir les statistiques :**
+#### Obtenir les statistiques
+
 ```json
 {}
 ```
 
-## Évolutions futures
+## 📡 API gRPC
 
-### Court terme
+### Service `CompteService`
 
-- **Tests unitaires et d'intégration** : Utiliser JUnit 5 et Mockito pour tester chaque couche
-- **Validation des données** : Ajouter des contraintes (solde minimum, format de date)
-- **Pagination** : Pour `AllComptes`, implémenter une pagination pour gérer de gros volumes
+| Méthode | Requête | Réponse | Description |
+|---------|---------|---------|-------------|
+| `AllComptes` | `GetAllComptesRequest` | `GetAllComptesResponse` | Liste tous les comptes |
+| `CompteById` | `GetCompteByIdRequest` | `GetCompteByIdResponse` | Recherche un compte par ID |
+| `TotalSolde` | `GetTotalSoldeRequest` | `GetTotalSoldeResponse` | Statistiques des soldes |
+| `SaveCompte` | `SaveCompteRequest` | `SaveCompteResponse` | Crée un nouveau compte |
 
-### Moyen terme
+### Messages Protobuf
 
-- **Authentification/Autorisation** : Intégrer Spring Security avec JWT
-- **Observabilité** : Ajouter Micrometer pour les métriques et Sleuth pour le tracing
-- **Cache** : Utiliser Redis pour mettre en cache les comptes fréquemment consultés
+#### Compte
 
-### Long terme
+```protobuf
+message Compte {
+    string id = 1;
+    float solde = 2;
+    string dateCreation = 3;
+    TypeCompte type = 4;
+}
 
-- **Streaming bidirectionnel** : Notifications temps réel des transactions
-- **Event Sourcing** : Tracer l'historique complet des modifications de compte
-- **Multi-tenancy** : Support de plusieurs banques/organisations
+enum TypeCompte {
+    COURANT = 0;
+    EPARGNE = 1;
+}
+```
 
-## Sécurité
+#### Statistiques
 
-### État actuel
+```protobuf
+message SoldeStats {
+    int32 count = 1;      // Nombre de comptes
+    float sum = 2;        // Somme des soldes
+    float average = 3;    // Moyenne des soldes
+}
+```
 
-⚠️ **Attention** : Cette version est un prototype de développement. Elle ne doit PAS être déployée en production sans les améliorations suivantes :
+## 🗄️ Base de données
 
-- Pas d'authentification
-- Pas de chiffrement TLS
-- Console H2 accessible publiquement
-- Pas de validation des entrées
+### Schéma de la table `compte`
 
-### Recommandations pour la production
+| Colonne | Type | Contrainte | Description |
+|---------|------|------------|-------------|
+| `id` | VARCHAR(255) | PRIMARY KEY | UUID généré automatiquement |
+| `solde` | FLOAT | NOT NULL | Solde du compte |
+| `date_creation` | VARCHAR(255) | - | Date de création |
+| `type` | VARCHAR(255) | - | Type de compte (COURANT/EPARGNE) |
 
-1. **TLS mutuel** : Chiffrer toutes les communications gRPC
-2. **Authentification** : Implémenter OAuth2 ou JWT
-3. **Validation** : Valider tous les inputs côté serveur
-4. **Rate limiting** : Protéger contre les abus
-5. **Audit logging** : Tracer toutes les opérations sensibles
+### Choix de conception
 
-## Base de données
+- **UUID** : Identifiants uniques pour la sécurité et la distribution
+- **H2 en mémoire** : Parfait pour le développement et les tests
+- **JPA/Hibernate** : Abstraction permettant une migration facile vers PostgreSQL/MySQL
 
-### Choix de H2
+## 🧪 Tests
 
-H2 est parfait pour le développement car :
-- Démarrage instantané
-- Pas de configuration externe
-- Console web intégrée
-- Compatible JPA
+### Exécuter les tests
 
-### Migration vers production
+```bash
+mvn test
+```
 
-Pour la production, je recommande PostgreSQL :
+### Tests manuels avec grpcurl
+
+```bash
+# Lister les services
+grpcurl -plaintext localhost:9090 list
+
+# Créer un compte
+grpcurl -plaintext -d '{
+  "compte": {
+    "solde": 1000,
+    "dateCreation": "2024-12-19",
+    "type": "COURANT"
+  }
+}' localhost:9090 CompteService/SaveCompte
+
+# Récupérer tous les comptes
+grpcurl -plaintext localhost:9090 CompteService/AllComptes
+```
+
+## 🚢 Déploiement
+
+### Production avec PostgreSQL
+
+1. **Ajouter la dépendance PostgreSQL** dans `pom.xml` :
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+</dependency>
+```
+
+2. **Modifier `application.properties`** :
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/banque
@@ -254,21 +324,64 @@ spring.datasource.password=${DB_PASSWORD}
 spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 ```
 
-Aucun changement de code n'est nécessaire grâce à l'abstraction JPA.
+### Docker
 
-## Conclusion
+```dockerfile
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY target/grpc-service-1.0.0.jar app.jar
+EXPOSE 9090 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
 
-Ce projet démontre comment construire un service financier moderne en combinant la puissance de gRPC avec la simplicité de Spring Boot. L'architecture en couches garantit la maintenabilité, tandis que le typage fort de Protobuf assure la fiabilité des communications.
+```bash
+docker build -t grpc-banking-service .
+docker run -p 9090:9090 -p 8081:8081 grpc-banking-service
+```
 
-Les choix techniques ont été guidés par trois principes :
-1. **Performance** : gRPC et sérialisation binaire
-2. **Maintenabilité** : Architecture en couches et séparation des responsabilités
-3. **Évolutivité** : Design permettant l'ajout facile de nouvelles fonctionnalités
+## 🔒 Sécurité
+
+⚠️ **Attention** : Cette version est un prototype de développement.
+
+### Pour la production, ajouter :
+
+- ✅ **TLS mutuel** : Chiffrer les communications gRPC
+- ✅ **Authentification** : OAuth2 ou JWT
+- ✅ **Validation** : Valider tous les inputs
+- ✅ **Rate limiting** : Protéger contre les abus
+- ✅ **Audit logging** : Tracer les opérations sensibles
+
+## 📝 Évolutions futures
+
+### Court terme
+- Tests unitaires et d'intégration avec JUnit 5
+- Validation des données (solde minimum, format de date)
+- Pagination pour `AllComptes`
+
+### Moyen terme
+- Authentification/Autorisation avec Spring Security
+- Observabilité avec Micrometer et Sleuth
+- Cache Redis pour les comptes fréquemment consultés
+
+### Long terme
+- Streaming bidirectionnel pour les notifications temps réel
+- Event Sourcing pour l'historique des modifications
+- Multi-tenancy pour plusieurs organisations
+
+## 👤 Auteur
+
+**Radim Yassin**
+
+- GitHub: [@RadimYassin](https://github.com/RadimYassin)
+- Projet: TP 18 - Implémentation d'un Service gRPC avec Spring Boot
+
+## 📄 Licence
+
+Ce projet est développé dans un cadre éducatif.
 
 ---
 
-**Auteur** : Développé dans le cadre du TP 18 - Implémentation d'un Service gRPC avec Spring Boot  
 **Version** : 1.0.0  
-**Date** : Décembre 2024
-#   T P - 1 8 - I m p l - m e n t a t i o n - d - u n - S e r v i c e - g R P C - a v e c - S p r i n g - B o o t  
- 
+**Date** : Décembre 2024  
+**Framework** : Spring Boot 3.2.0  
+**Java** : 17 LTS
